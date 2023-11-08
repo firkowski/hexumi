@@ -1,22 +1,34 @@
 # Hexumi
 ---
-
 Hexumi is a low-cost 3D-printed 18 DoF walking hexapod robot built using Raspberry Pi and ROS2.
 
 <img src="/img/HEXUMI_DSSERVO-1.png" height="300" />
 
+---
 ## Acknowledgements
 The code for Pimoroni Servo2040 servo driver is based on the [C/C++ Pimoroni Pico library](https://github.com/pimoroni/pimoroni-pico) and [micro-ROS](https://github.com/micro-ROS/).
 
 ## Documentation
-
 I am currently working on the documentation, assembly instructions, and installation guide, which will be available shortly.
 
 ## Development
+For in-depth insights into the development process and detailed build instructions, please refer to my 2023 paper, "Design and Simulation of a Six-Legged Walking Robot", accessible on my [ResearchGate profile](https://www.researchgate.net/profile/Maksymilian-Firkowski/research). Even if you don't intend to replicate Hexumi, the paper provides a valuable roadmap for designing your robot.
+
+## Dependencies
+Software in this repo requires ROS2 Humble to run.
+
+To use the Pro Controller, you will have to install [joycond](https://github.com/DanielOgorchock/joycond) on your Raspberry Pi.
+
+Building servo driver's firmware requires the [Pico SDK](https://github.com/raspberrypi/pico-sdk) and [micro-ros-setup](https://github.com/micro-ROS/micro_ros_setup). Remember to export `PICO_SDK_PATH` to point to the folder with the SDK.
+
 ---
+## Licensing
 
-For in-depth insights into the development process and detailed build instructions, please refer to my 2023 paper, "Design Process of an 18 DoF Walking Hexapod Robot," accessible on my [ResearchGate profile](https://www.researchgate.net/profile/Maksymilian-Firkowski/research). Even if you don't intend to replicate Hexumi, the paper provides a valuable roadmap for designing your robot.
+Code is shared under the MIT license. For details, see [src/LICENSE](src/LICENSE) or [uros/LICENSE](uros/LICENSE).
 
+CAD files, STL files, and the wiring diagram are shared under the Creative Commons Attribution 4.0 License. For details, see [CAD/LICENSE](CAD/LICENSE), [STL/LICENSE](STL/LICENSE), or [img/LICENSE](img/LICENSE).
+
+---
 ## Why Hexumi?
 I designed Hexumi as the subject of my Mechanical Engineering BSc thesis at the Lodz University of Technology, driven by two significant events: the COVID-19 pandemic and the rise of consumer AI. Over the past years, millions of people lost the ability to interact with the outside world due to lockdowns. Simultaneously, the threat of machine learning systems replacing online work loomed. Existing robotic tools for physical labor were either too expensive or lacked sophistication, making them inaccessible to the average person. Thus, I aimed to contribute to the development of affordable robotic solutions for research, education, and entertainment, with the potential to democratize access to mobile and dextrous robots.
 
@@ -32,12 +44,7 @@ I designed Hexumi as the subject of my Mechanical Engineering BSc thesis at the 
 
 - **Ease of Use:** Hexumi was designed to be both modifiable and easy to use. Peripheral components, such as the charging port, provide a simple out-of-the-box experience for a novice user.
 
-## Licensing
 ---
-
-CAD files, STL files, and the software are shared under the Apache 2.0 license. For details, see [LICENSE](LICENSE).
-
 ## About The Author
----
 
-My name is Maksymilian Firkowski (<i>feer-cov-skee, 피르코브스키</i>). I am a young Mechanical Engineer born in Poland interested in the development of intelligent mechanical systems that are reliable and sustainable at the mechanical and software levels. I happen to be temperamentally inclined towards low-level, bare-metal design where I can understand the inner workings of a system; that's why I've wanted to be a mechanical engineer since childhood and perhaps that's also the reason why I lean towards low-level software development. I am an avid believer in the open-source philosophy and technological education, and do my best to support them. In my free time I work on projects similar to this one, with Hexumi being my most extensive work yet. I also dabble in industrial, design, graphical design, and cryptography.
+My name is Maksymilian Firkowski (<i>feer-cov-skee, 피르코브스키</i>). I am a young Mechanical Engineer born in Poland interested in the development of intelligent mechanical systems that are reliable and sustainable at the mechanical and software levels. I happen to be temperamentally inclined towards low-level, bare-metal design where I can understand the inner workings of a system; that's why I've wanted to be a mechanical engineer since childhood and perhaps that's also the reason why I lean towards low-level software development. I am an avid believer in the open-source philosophy and technological education, and do my best to support them. In my free time I work on projects similar to this one, with Hexumi being my most extensive work yet. I also dabble in industrial design, graphical design, and cryptography.
