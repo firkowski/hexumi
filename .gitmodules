@@ -1,0 +1,3 @@
+[submodule "uros/uros_ws/src/micro_ros_setup"]
+	path = uros/uros_ws/src/micro_ros_setup
+	url = https://github.com/micro-ROS/micro_ros_setup.git
