@@ -50,9 +50,6 @@ def generate_launch_description():
         parameters=[{'robot_description': robot_description}]
     )
 
-    # RViz
-    # UNCOMMENT TO LAUNCH RVIZ ON BRINGUP
-    '''
     joint_state_publisher_node = Node(
         package="joint_state_publisher",
         executable="joint_state_publisher",
@@ -72,12 +69,4 @@ def generate_launch_description():
         global_param_node,
         joint_state_publisher_node,
         rviz2_node
-    ])
-    '''
-
-    return LaunchDescription([
-        robot_state_publisher_node,
-        kinematics_node,
-        teleop_launch_file,
-        global_param_node,
     ])
