@@ -215,7 +215,7 @@ void subscription_callback(const void * msgin)
 
     for (size_t i = 0; i < NUM_SERVOS; i++) {
 		int j = servo_IDs[i];
-		float deg = static_cast<float>(msg->joint_angles[i]) * 180.0 / M_PI;
+		float deg = static_cast<float>(msg->joint_angles.data[i]) * 180.0 / M_PI;
 		//joint_state_msg.position.data[i] = deg;
 
 		float angle = angle_map(j, deg);
