@@ -1,0 +1,16 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/max/Documents/thesis-sync/code/hexumi/install/servo2040_uros/local/lib/python3.10/dist-packages",
+        "/home/max/Documents/thesis-sync/code/hexumi/install/hexumi_power_control/lib/python3.10/site-packages",
+        "/home/max/Documents/thesis-sync/code/hexumi/install/hexumi_msgs/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/max/Documents/thesis-sync/code/hexumi/install/servo2040_uros/local/lib/python3.10/dist-packages",
+        "/home/max/Documents/thesis-sync/code/hexumi/install/hexumi_power_control/lib/python3.10/site-packages",
+        "/home/max/Documents/thesis-sync/code/hexumi/install/hexumi_msgs/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}

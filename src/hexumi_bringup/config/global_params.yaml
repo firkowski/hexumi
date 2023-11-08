@@ -1,0 +1,71 @@
+global_parameter_server:
+  ros__parameters:
+    robot_description: "$(find-pkg-share hexumi_description)/urdf/hexumi.xacro"
+
+    robot_name: "Hexumi"
+
+    num_legs: 6
+
+    num_leg_joints: 3
+
+    leg_suffixes: ["R1", "R2", "R3", "L3", "L2", "L1"]
+
+    #leg_suffixes: ["L1", "L2", "L3", "R1", "R2", "R3"]
+
+# link info
+    tibia_angle_offset_deg: -15.0
+
+#joint limits
+    coxa_joint_upper_limit : 90.0
+    coxa_joint_lower_limit : -90.0
+    femur_joint_upper_limit : 90.0
+    femur_joint_lower_limit : -90.0
+    tibia_joint_upper_limit : 0.0
+    tibia_joint_lower_limit : -180.0
+
+# default sitting position 
+    #L1_sitting_radius: 0.215
+    #L2_sitting_radius: 0.195
+    #L3_sitting_radius: 0.215
+
+    #R1_sitting_radius: 0.215
+    #R2_sitting_radius: 0.195
+    #R3_sitting_radius: 0.215
+
+    L1_sitting_radius: 0.235
+    L2_sitting_radius: 0.225
+    L3_sitting_radius: 0.235
+
+    R1_sitting_radius: 0.235
+    R2_sitting_radius: 0.225
+    R3_sitting_radius: 0.235
+
+    leg_sitting_z: -0.035
+
+# teleop limits
+    max_lin_velocity : 0.1
+    
+    max_ang_velocity : 0.4
+
+    max_body_x_euler : 0.0
+    
+    max_body_y_euler : 0.15
+    
+    max_body_z_euler : 0.15
+    
+    max_body_x : 0.04
+    
+    max_body_y : 0.04
+
+    max_body_z : 0.1
+    
+    max_body_velocity_z : 0.1
+
+# gait params
+    transfer_height: 0.04
+
+    max_obstacle_height: 0.04
+
+    workspace_ellipse_axes: [0.150, 0.130, 0.115]
+
+    workspace_ellipse_origin: [0.120, 0.0, -0.109]

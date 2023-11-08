@@ -1,0 +1,25 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/opt/ros/humble/include/**",
+        "/home/max/hexumi/main/src/hexumi_description/include/**",
+        "/home/max/hexumi/main/src/hexumi_kinematics/include/**",
+        "/home/max/hexumi/main/src/hexumi_msgs/include/**",
+        "/home/max/hexumi/main/src/hexumi_teleop_joy/include/**",
+        "/home/max/hexumi/main/src/servo2040_uros/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

@@ -1,0 +1,438 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/xacro" name="hexumi">
+
+  <material name="black_pla">
+    <color rgba="0.8 0.8 0.8 1" />
+  </material>
+
+  <material name="red_pla">
+    <color rgba="0.9176470588235294 0.22745098039215686 0.1568627450980392 1" />
+  </material>
+
+  <material name="white_pla">
+    <color rgba="0.8392156862745098 0.9254901960784314 0.9647058823529412 1" />
+  </material>
+
+  <material name="grey_pla">
+    <color rgba="0.4470588235294118 0.5568627450980392 0.6745098039215687 1" />
+  </material>
+
+  <!-- parameters -->
+  <xacro:property name="body_length_front_x" value="88.77" />
+  <xacro:property name="body_length_back_x" value="130.7" />
+  <xacro:property name="body_length_y" value="230.47" />
+  <xacro:property name="coxa_length" value="40" />
+  <xacro:property name="femur_length" value="70" />
+  <xacro:property name="tibia_length" value="130" />
+  <xacro:property name="tibia_angle_offset" value="${-pi / 12}" />
+
+  <xacro:property name="body_mass" value="1070.64" />
+  <xacro:property name="coxa_mass" value="11.045" />
+  <xacro:property name="femur_mass" value="5.14" />
+  <xacro:property name="tibia_mass" value="1.3722" />
+
+  <xacro:property name="L1_origin_radius" value="110" />
+  <xacro:property name="L1_origin_angle" value="${pi / 6}" />
+  <xacro:property name="L1_origin_z" value="-7.5" />
+
+  <xacro:property name="L2_origin_radius" value="90" />
+  <xacro:property name="L2_origin_angle" value="${pi / 2}" />
+  <xacro:property name="L2_origin_z" value="-7.5" />
+
+  <xacro:property name="L3_origin_radius" value="110" />
+  <xacro:property name="L3_origin_angle" value="${pi * 5 / 6}" />
+  <xacro:property name="L3_origin_z" value="-7.5" />
+
+  <xacro:property name="R1_origin_radius" value="110" />
+  <xacro:property name="R1_origin_angle" value="-${pi / 6}" />
+  <xacro:property name="R1_origin_z" value="-7.5" />
+
+  <xacro:property name="R2_origin_radius" value="90" />
+  <xacro:property name="R2_origin_angle" value="-${pi / 2}" />
+  <xacro:property name="R2_origin_z" value="-7.5" />
+
+  <xacro:property name="R3_origin_radius" value="110" />
+  <xacro:property name="R3_origin_angle" value="-${pi * 5 / 6}" />
+  <xacro:property name="R3_origin_z" value="-7.5" />
+  
+  <!-- inertia stuff -->
+  <xacro:property name="body_x" value="-0.02416" />
+  <xacro:property name="body_y" value="0.00018" />
+  <xacro:property name="body_z" value="0.00977" />
+  <xacro:property name="body_roll" value="0" />
+  <xacro:property name="body_pitch" value="0" />
+  <xacro:property name="body_yaw" value="0" />
+  <xacro:property name="body_ixx" value="0.00329495565" />
+  <xacro:property name="body_iyy" value="0.00422550506" />
+  <xacro:property name="body_izz" value="0.00610423987" />
+  <xacro:property name="body_ixy" value="-0.00000818428" />
+  <xacro:property name="body_ixz" value="-0.00007183633" />
+  <xacro:property name="body_iyz" value="-0.00002312133" />
+
+  <xacro:property name="coxa_L_x" value="-0.00708" />
+  <xacro:property name="coxa_L_y" value="-0.00983" />
+  <xacro:property name="coxa_L_z" value="-0.02613" />
+  <xacro:property name="coxa_L_roll" value="0" />
+  <xacro:property name="coxa_L_pitch" value="0" />
+  <xacro:property name="coxa_L_yaw" value="0" />
+  <xacro:property name="coxa_L_ixx" value="0.00004537142" />
+  <xacro:property name="coxa_L_iyy" value="0.00003512301" />
+  <xacro:property name="coxa_L_izz" value="0.00005818289" />
+  <xacro:property name="coxa_L_ixy" value="0.00000080668" />
+  <xacro:property name="coxa_L_ixz" value="0.00000025971" />
+  <xacro:property name="coxa_L_iyz" value="0.00000033767" />
+
+  <xacro:property name="coxa_R_x" value="-0.00708" />
+  <xacro:property name="coxa_R_y" value="-0.00983" />
+  <xacro:property name="coxa_R_z" value="0.02613" />
+  <xacro:property name="coxa_R_roll" value="0" />
+  <xacro:property name="coxa_R_pitch" value="0" />
+  <xacro:property name="coxa_R_yaw" value="0" />
+  <xacro:property name="coxa_R_ixx" value="0.00004537796" />
+  <xacro:property name="coxa_R_iyy" value="0.00003512955" />
+  <xacro:property name="coxa_R_izz" value="0.00005818289" />
+  <xacro:property name="coxa_R_ixy" value="0.00000080667" />
+  <xacro:property name="coxa_R_ixz" value="-0.00000026225" />
+  <xacro:property name="coxa_R_iyz" value="-0.00000034651" />
+
+  <xacro:property name="femur_L_x" value="0.035" />
+  <xacro:property name="femur_L_y" value="0.00305" />
+  <xacro:property name="femur_L_z" value="-0.03111" />
+  <xacro:property name="femur_L_roll" value="0" />
+  <xacro:property name="femur_L_pitch" value="0" />
+  <xacro:property name="femur_L_yaw" value="0" />
+  <xacro:property name="femur_L_ixx" value="0.00003795796" />
+  <xacro:property name="femur_L_iyy" value="0.00007254033" />
+  <xacro:property name="femur_L_izz" value="0.00004000019" />
+  <xacro:property name="femur_L_ixy" value="0" />
+  <xacro:property name="femur_L_ixz" value="0" />
+  <xacro:property name="femur_L_iyz" value="-0.00000021619" />
+
+  <xacro:property name="femur_R_x" value="0.035" />
+  <xacro:property name="femur_R_y" value="0.00305" />
+  <xacro:property name="femur_R_z" value="0.03111" />
+  <xacro:property name="femur_R_roll" value="0" />
+  <xacro:property name="femur_R_pitch" value="0" />
+  <xacro:property name="femur_R_yaw" value="0" />
+  <xacro:property name="femur_R_ixx" value="0.00003795796" />
+  <xacro:property name="femur_R_iyy" value="0.00007254033" />
+  <xacro:property name="femur_R_izz" value="0.00004000019" />
+  <xacro:property name="femur_R_ixy" value="0" />
+  <xacro:property name="femur_R_ixz" value="0" />
+  <xacro:property name="femur_R_iyz" value="0.00000021619" />
+
+  <xacro:property name="tibia_L_x" value="0.0286" />
+  <xacro:property name="tibia_L_y" value="0.0114" />
+  <xacro:property name="tibia_L_z" value="-0.00028" />
+  <xacro:property name="tibia_L_roll" value="0" />
+  <xacro:property name="tibia_L_pitch" value="0" />
+  <xacro:property name="tibia_L_yaw" value="0" />
+  <xacro:property name="tibia_L_ixx" value="0.00004499197" />
+  <xacro:property name="tibia_L_iyy" value="0.00019412525" />
+  <xacro:property name="tibia_L_izz" value="0.00021338222" />
+  <xacro:property name="tibia_L_ixy" value="-0.00005286863" />
+  <xacro:property name="tibia_L_ixz" value="-0.00000107478" />
+  <xacro:property name="tibia_L_iyz" value="-0.00000044041" />
+
+  <xacro:property name="tibia_R_x" value="0.0286" />
+  <xacro:property name="tibia_R_y" value="0.0114" />
+  <xacro:property name="tibia_R_z" value="0.00028" />
+  <xacro:property name="tibia_R_roll" value="0" />
+  <xacro:property name="tibia_R_pitch" value="0" />
+  <xacro:property name="tibia_R_yaw" value="0" />
+  <xacro:property name="tibia_R_ixx" value="0.00004499197" />
+  <xacro:property name="tibia_R_iyy" value="0.00019412525" />
+  <xacro:property name="tibia_R_izz" value="0.00021338222" />
+  <xacro:property name="tibia_R_ixy" value="-0.00005286863" />
+  <xacro:property name="tibia_R_ixz" value="0.00000107479" />
+  <xacro:property name="tibia_R_iyz" value="0.00000044041" />
+
+  <!-- inertia macro -->
+
+  <xacro:macro name="inertia_macro"
+    params="mass 
+                                              x_L 
+                                              y_L 
+                                              z_L 
+                                              roll_L 
+                                              pitch_L 
+                                              yaw_L 
+                                              ixx_L 
+                                              iyy_L 
+                                              izz_L 
+                                              ixy_L 
+                                              ixz_L 
+                                              iyz_L 
+
+                                              x_R 
+                                              y_R 
+                                              z_R 
+                                              roll_R 
+                                              pitch_R 
+                                              yaw_R 
+                                              ixx_R 
+                                              iyy_R 
+                                              izz_R 
+                                              ixy_R 
+                                              ixz_R 
+                                              iyz_R">
+    <xacro:if value="${side == 'L'}">
+      <inertial>
+        <origin xyz="${x_L} ${y_L} ${z_L}" rpy="${roll_L} ${pitch_L} ${yaw_L}" />
+        <mass value="${mass}" />
+        <inertia ixx="${ixx_L}" iyy="${iyy_L}" izz="${izz_L}" ixy="${ixy_L}" ixz="${ixz_L}"
+          iyz="${iyz_L}" />
+      </inertial>
+    </xacro:if>
+    <xacro:if value="${side == 'R'}">
+      <inertial>
+        <origin xyz="${x_R} ${y_R} ${z_R}" rpy="${roll_R} ${pitch_R} ${yaw_R}" />
+        <mass value="${mass}" />
+        <inertia ixx="${ixx_R}" iyy="${iyy_R}" izz="${izz_R}" ixy="${ixy_R}" ixz="${ixz_R}"
+          iyz="${iyz_R}" />
+      </inertial>
+    </xacro:if>
+  </xacro:macro>
+
+  <!-- Build the body frame -->
+  <link name="base_link" />
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_link" />
+    <child link="body" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+  <link name="body">
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="file://$(find my_robot_description)/meshes/collision/BODY_COLLISIONS.stl"
+          scale="1.0 1.0 1.0" />
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="file://$(find my_robot_description)/meshes/visual/BODY.stl"
+          scale="1.0 1.0 1.0" />
+      </geometry>
+      <material name="white_pla" />
+    </visual>
+    <inertial>
+      <origin xyz="${body_x} ${body_y} ${body_z}" rpy="${body_roll} ${body_pitch} ${body_yaw}" />
+      <mass value="${body_mass}" />
+      <inertia ixx="${body_ixx}" iyy="${body_iyy}" izz="${body_izz}" ixy="${body_ixy}"
+        ixz="${body_ixz}" iyz="${body_iyz}" />
+    </inertial>
+  </link>
+
+  <!-- Joint properties -->
+  <xacro:property name="joint_lower_limit" value="-${pi}" />
+  <xacro:property name="joint_upper_limit" value="${pi}" />
+  <xacro:property name="joint_effort" value="100000" />
+  <xacro:property name="joint_velocity" value="10" />
+
+  <!-- Leg macro -->
+  <xacro:macro name="leg" params="side position x y angle">
+    <joint name="virtual_body_joint_${side}${position}" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="body" />
+      <child link="hip_${side}${position}" />
+    </joint>
+
+    <link name="hip_${side}${position}">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="0" />
+        <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      </inertial>
+    </link>
+
+    <!-- coxa -->
+    <joint name="coxa_joint_${side}${position}" type="revolute">
+      <origin xyz="${x} ${y} 0" rpy="0 0 ${angle}" />
+      <parent link="hip_${side}${position}" />
+      <child link="coxa_${side}${position}" />
+      <axis xyz="0 0 1" />
+      <limit lower="${joint_lower_limit}" upper="${joint_upper_limit}" effort="${joint_effort}"
+        velocity="${joint_velocity}" />
+    </joint>
+    <link name="coxa_${side}${position}">
+      <collision>
+        <origin xyz="0 0 2.0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="file://$(find my_robot_description)/meshes/collision/COXA_COLLISIONS.stl"
+            scale="1.0 1.0 1.0" />
+        </geometry>
+      </collision>
+      <visual>
+        <origin xyz="0 0 2.0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="file://$(find my_robot_description)/meshes/visual/COXA_${side}.stl"
+            scale="1.0 1.0 1.0" />
+        </geometry>
+        <material name="grey_pla" />
+      </visual>
+      <xacro:inertia_macro mass="${coxa_mass}"
+        x_L="${coxa_L_x}"
+        y_L="${coxa_L_y}"
+        z_L="${coxa_L_z}"
+        roll_L="${coxa_L_roll}"
+        pitch_L="${coxa_L_pitch}"
+        yaw_L="${coxa_L_yaw}"
+        ixx_L="${coxa_L_ixx}"
+        iyy_L="${coxa_L_iyy}"
+        izz_L="${coxa_L_izz}"
+        ixy_L="${coxa_L_ixy}"
+        ixz_L="${coxa_L_ixz}"
+        iyz_L="${coxa_L_iyz}"
+        x_R="${coxa_R_x}"
+        y_R="${coxa_R_y}"
+        z_R="${coxa_R_z}"
+        roll_R="${coxa_R_roll}"
+        pitch_R="${coxa_R_pitch}"
+        yaw_R="${coxa_R_yaw}"
+        ixx_R="${coxa_R_ixx}"
+        iyy_R="${coxa_R_iyy}"
+        izz_R="${coxa_R_izz}"
+        ixy_R="${coxa_R_ixy}"
+        ixz_R="${coxa_R_ixz}"
+        iyz_R="${coxa_R_iyz}" />
+    </link>
+
+    <!-- femur -->
+    <joint name="femur_joint_${side}${position}" type="revolute">
+      <origin xyz="${coxa_length} 0 0" rpy="${pi/2} 0 0" />
+      <parent link="coxa_${side}${position}" />
+      <child link="femur_${side}${position}" />
+      <axis xyz="0 0 1" />
+      <limit lower="${joint_lower_limit}" upper="${joint_upper_limit}" effort="${joint_effort}"
+        velocity="${joint_velocity}" />
+    </joint>
+    <link name="femur_${side}${position}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="file://$(find my_robot_description)/meshes/visual/FEMUR_${side}.stl"
+            scale="1.0 1.0 1.0" />
+        </geometry>
+        <material name="white_pla" />
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh
+            filename="file://$(find my_robot_description)/meshes/collision/FEMUR_${side}_COLLISIONS.stl"
+            scale="1.0 1.0 1.0" />
+        </geometry>
+      </collision>
+      <xacro:inertia_macro mass="${femur_mass}"
+        x_L="${femur_L_x}"
+        y_L="${femur_L_y}"
+        z_L="${femur_L_z}"
+        roll_L="${femur_L_roll}"
+        pitch_L="${femur_L_pitch}"
+        yaw_L="${femur_L_yaw}"
+        ixx_L="${femur_L_ixx}"
+        iyy_L="${femur_L_iyy}"
+        izz_L="${femur_L_izz}"
+        ixy_L="${femur_L_ixy}"
+        ixz_L="${femur_L_ixz}"
+        iyz_L="${femur_L_iyz}"
+        x_R="${femur_R_x}"
+        y_R="${femur_R_y}"
+        z_R="${femur_R_z}"
+        roll_R="${femur_R_roll}"
+        pitch_R="${femur_R_pitch}"
+        yaw_R="${femur_R_yaw}"
+        ixx_R="${femur_R_ixx}"
+        iyy_R="${femur_R_iyy}"
+        izz_R="${femur_R_izz}"
+        ixy_R="${femur_R_ixy}"
+        ixz_R="${femur_R_ixz}"
+        iyz_R="${femur_R_iyz}" />
+    </link>
+
+    <!-- tibia -->
+    <joint name="tibia_joint_${side}${position}" type="revolute">
+      <origin xyz="${femur_length} 0 0" rpy="0 0 0" />
+      <parent link="femur_${side}${position}" />
+      <child link="tibia_${side}${position}" />
+      <axis xyz="0 0 1" />
+      <limit lower="${joint_lower_limit}" upper="${joint_upper_limit}" effort="${joint_effort}"
+        velocity="${joint_velocity}" />
+    </joint>
+    <link name="tibia_${side}${position}">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 ${tibia_angle_offset}" />
+        <geometry>
+          <mesh filename="file://$(find my_robot_description)/meshes/visual/TIBIA_${side}.stl"
+            scale="1.0 1.0 1.0" />
+        </geometry>
+        <material name="red_pla" />
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 ${tibia_angle_offset}" />
+        <geometry>
+          <mesh filename="file://$(find my_robot_description)/meshes/collision/TIBIA_COLLISIONS.stl"
+            scale="1.0 1.0 1.0" />
+        </geometry>
+      </collision>
+      <xacro:inertia_macro mass="${tibia_mass}"
+        x_L="${tibia_L_x}"
+        y_L="${tibia_L_y}"
+        z_L="${tibia_L_z}"
+        roll_L="${tibia_L_roll}"
+        pitch_L="${tibia_L_pitch}"
+        yaw_L="${tibia_L_yaw}"
+        ixx_L="${tibia_L_ixx}"
+        iyy_L="${tibia_L_iyy}"
+        izz_L="${tibia_L_izz}"
+        ixy_L="${tibia_L_ixy}"
+        ixz_L="${tibia_L_ixz}"
+        iyz_L="${tibia_L_iyz}"
+        x_R="${tibia_R_x}"
+        y_R="${tibia_R_y}"
+        z_R="${tibia_R_z}"
+        roll_R="${tibia_R_roll}"
+        pitch_R="${tibia_R_pitch}"
+        yaw_R="${tibia_R_yaw}"
+        ixx_R="${tibia_R_ixx}"
+        iyy_R="${tibia_R_iyy}"
+        izz_R="${tibia_R_izz}"
+        ixy_R="${tibia_R_ixy}"
+        ixz_R="${tibia_R_ixz}"
+        iyz_R="${tibia_R_iyz}" />
+    </link>
+
+    <joint name="end_effector_joint_${side}${position}" type="fixed">
+      <origin xyz="${tibia_length} 0 0" rpy="0 0 0" />
+      <parent link="tibia_${side}${position}" />
+      <child link="end_effector_${side}${position}" />
+    </joint>
+
+    <link name="end_effector_${side}${position}">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="0" />
+        <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0" />
+      </inertial>
+    </link>
+  </xacro:macro>
+
+  <!-- Build robot model -->
+
+  <xacro:macro name="leg_polar" params="side position R phi">
+    <xacro:leg side="${side}" position="${position}" x="${R * cos(phi)}" y="${R * sin(phi)}"
+      angle="${phi}" />
+  </xacro:macro>
+
+  <xacro:leg_polar side="R" position="1" R="${R1_origin_radius}" phi="${R1_origin_angle}" />
+  <xacro:leg_polar side="R" position="2" R="${R2_origin_radius}" phi="${R2_origin_angle}" />
+  <xacro:leg_polar side="R" position="3" R="${R3_origin_radius}" phi="${R3_origin_angle}" />
+
+  <xacro:leg_polar side="L" position="1" R="${L1_origin_radius}" phi="${L1_origin_angle}" />
+  <xacro:leg_polar side="L" position="2" R="${L2_origin_radius}" phi="${L2_origin_angle}" />
+  <xacro:leg_polar side="L" position="3" R="${L3_origin_radius}" phi="${L3_origin_angle}" />
+
+</robot>

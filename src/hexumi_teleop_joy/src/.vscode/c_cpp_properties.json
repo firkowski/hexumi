@@ -1,0 +1,27 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/max/Documents/thesis-sync/code/hexumi/install/servo2040_uros/include/**",
+        "/home/max/Documents/thesis-sync/code/hexumi/install/hexumi_msgs/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/max/Documents/thesis-sync/code/hexumi/src/hexumi_description/include/**",
+        "/home/max/Documents/thesis-sync/code/hexumi/src/hexumi_kinematics/include/**",
+        "/home/max/Documents/thesis-sync/code/hexumi/src/hexumi_msgs/include/**",
+        "/home/max/Documents/thesis-sync/code/hexumi/src/hexumi_teleop_joy/include/**",
+        "/home/max/Documents/thesis-sync/code/hexumi/src/servo2040_uros/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

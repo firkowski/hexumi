@@ -1,0 +1,25 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/max/Documents/thesis-sync/code/hexumi/src/uros/uros_ws/install/micro_ros_agent/include/**",
+        "/home/max/Documents/thesis-sync/code/hexumi/src/uros/uros_ws/install/micro_ros_msgs/include/**",
+        "/home/max/Documents/thesis-sync/code/hexumi/src/uros/uros_ws/install/servo2040_uros/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/max/Documents/thesis-sync/code/hexumi/src/uros/uros_ws/src/servo2040_uros/include/**",
+        "/home/max/Documents/thesis-sync/code/hexumi/src/uros/uros_ws/src/uros/micro-ROS-Agent/micro_ros_agent/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

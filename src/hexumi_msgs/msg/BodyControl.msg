@@ -1,0 +1,2 @@
+hexumi_msgs/PoseEuler body_pose_euler_angles
+geometry_msgs/Twist body_twist

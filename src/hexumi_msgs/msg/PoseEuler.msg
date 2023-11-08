@@ -1,0 +1,2 @@
+hexumi_msgs/EulerAngles euler_angles
+geometry_msgs/Point position

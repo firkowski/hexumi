@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 3.6.2 commit date:2023-08-16, commit time:16:43, hash:e53e55951e7a</authoring_tool>
+    </contributor>
+    <created>2023-09-13T01:42:46</created>
+    <modified>2023-09-13T01:42:46</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_images/>
+  <library_geometries>
+    <geometry id="COXA_COLLISIONS-mesh" name="COXA_COLLISIONS">
+      <mesh>
+        <source id="COXA_COLLISIONS-mesh-positions">
+          <float_array id="COXA_COLLISIONS-mesh-positions-array" count="96">0 26.5 55.67391 0 26.5 60.29701 33.05023 26.5 55.67391 60.29701 26.5 60.29701 60.29701 26.5 10.91838 60.29701 26.5 0 33.05023 26.5 6.590374 0 26.5 0 0 26.5 6.590374 60.29701 26.5 50.91838 40.29701 26.5 50.91838 40.29701 26.5 10.91838 33.05023 8.5 6.590374 0 8.5 6.590374 0 8.5 0 60.29701 8.5 0 60.29701 8.5 10.91838 40.29701 8.5 10.91838 33.05023 8.5 55.67391 40.29701 8.5 50.91838 0 8.5 60.29701 0 8.5 55.67391 60.29701 8.5 50.91838 60.29701 8.5 60.29701 60.29701 35 10.91838 60.29701 35 50.91838 60.29701 0 50.91838 60.29701 0 10.91838 40.29701 0 50.91838 40.29701 0 10.91838 40.29701 35 10.91838 40.29701 35 50.91838</float_array>
+          <technique_common>
+            <accessor source="#COXA_COLLISIONS-mesh-positions-array" count="32" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="COXA_COLLISIONS-mesh-normals">
+          <float_array id="COXA_COLLISIONS-mesh-normals-array" count="24">0 1 0 0 -1 0 0 -1 -1.53594e-7 0 -1 4.37906e-7 1 0 0 0 0 -1 -1 0 0 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#COXA_COLLISIONS-mesh-normals-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="COXA_COLLISIONS-mesh-vertices">
+          <input semantic="POSITION" source="#COXA_COLLISIONS-mesh-positions"/>
+        </vertices>
+        <triangles count="60">
+          <input semantic="VERTEX" source="#COXA_COLLISIONS-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#COXA_COLLISIONS-mesh-normals" offset="1"/>
+          <p>0 0 1 0 2 0 2 0 1 0 3 0 4 0 5 0 6 0 6 0 5 0 7 0 6 0 7 0 8 0 3 0 9 0 2 0 2 0 9 0 10 0 2 0 10 0 6 0 6 0 10 0 11 0 6 0 11 0 4 0 12 1 13 1 14 1 15 1 16 1 17 1 14 2 15 2 12 2 12 1 15 1 17 1 12 1 17 1 18 1 18 1 17 1 19 1 20 1 21 1 18 1 19 1 22 1 18 1 18 1 22 1 23 1 18 3 23 3 20 3 4 4 24 4 25 4 22 4 26 4 27 4 16 4 15 4 5 4 9 4 3 4 23 4 23 4 22 4 9 4 9 4 22 4 27 4 9 4 27 4 25 4 25 4 27 4 16 4 25 4 16 4 4 4 4 4 16 4 5 4 7 5 5 5 14 5 14 5 5 5 15 5 8 6 7 6 13 6 13 6 7 6 14 6 6 7 8 7 12 7 12 7 8 7 13 7 2 6 6 6 18 6 18 6 6 6 12 6 0 5 2 5 21 5 21 5 2 5 18 5 1 6 0 6 20 6 20 6 0 6 21 6 3 7 1 7 23 7 23 7 1 7 20 7 28 1 29 1 26 1 26 1 29 1 27 1 19 7 28 7 22 7 22 7 28 7 26 7 17 6 29 6 19 6 19 6 29 6 28 6 16 5 27 5 17 5 17 5 27 5 29 5 30 5 24 5 11 5 11 5 24 5 4 5 31 6 30 6 10 6 10 6 30 6 11 6 25 7 31 7 9 7 9 7 31 7 10 7 30 0 31 0 24 0 24 0 31 0 25 0</p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="COXA_COLLISIONS" name="COXA_COLLISIONS" type="NODE">
+        <matrix sid="transform">1 0 0 -9.864427 0 1 0 -17.82231 0 0 1 -41.06121 0 0 0 1</matrix>
+        <instance_geometry url="#COXA_COLLISIONS-mesh" name="COXA_COLLISIONS"/>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>

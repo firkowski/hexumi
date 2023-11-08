@@ -1,0 +1,1 @@
+bool[6] foot_ground_contact

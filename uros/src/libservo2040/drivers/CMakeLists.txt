@@ -1,0 +1,6 @@
+add_subdirectory(analog)
+add_subdirectory(analogmux)
+add_subdirectory(button)
+add_subdirectory(plasma)
+add_subdirectory(pwm)
+add_subdirectory(servo)
