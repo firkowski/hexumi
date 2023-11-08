@@ -11,6 +11,11 @@ The code for Pimoroni Servo2040 servo driver is based on the [C/C++ Pimoroni Pic
 ## Documentation
 I am currently working on the documentation, assembly instructions, and installation guide, which will be available shortly.
 
+#### Installation (WIP)
+The `main` branch contains CAD and STL files. It's meant to be cloned to the development machine.
+
+The `hexumi-base` branch contains minimal code meant to be run directly on the robot.
+
 ## Development
 For in-depth insights into the development process and detailed build instructions, please refer to my 2023 paper, "Design and Simulation of a Six-Legged Walking Robot", accessible on my [ResearchGate profile](https://www.researchgate.net/profile/Maksymilian-Firkowski/research). Even if you don't intend to replicate Hexumi, the paper provides a valuable roadmap for designing your robot.
 
