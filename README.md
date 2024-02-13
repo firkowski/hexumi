@@ -48,8 +48,3 @@ I designed Hexumi as the subject of my Mechanical Engineering BSc thesis at the 
 - **Software and Sensor Expandability:** Hexumi is designed to operate with the Robot Operating System, preferably ROS2, as its RP2040-based servo driver is well-suited for Micro-ROS. The robot's housing design, a 5V USB power port, and 1.5kg static payload capacity allow mounting additional sensors, such as LIDARs, cameras, IMUs, and more.
 
 - **Ease of Use:** Hexumi was designed to be both modifiable and easy to use. Peripheral components, such as the charging port, provide a simple out-of-the-box experience for a novice user.
-
----
-## About The Author
-
-My name is Maksymilian Firkowski (<i>feer-cov-skee, 피르코브스키</i>). I am a young Mechanical Engineer born in Poland interested in the development of intelligent mechanical systems that are reliable and sustainable at the mechanical and software levels. I happen to be temperamentally inclined towards low-level, bare-metal design where I can understand the inner workings of a system; that's why I've wanted to be a mechanical engineer since childhood and perhaps that's also the reason why I lean towards low-level software development. I am an avid believer in the open-source philosophy and technological education, and do my best to support them. In my free time I work on projects similar to this one, with Hexumi being my most extensive work yet. I also dabble in industrial design, graphical design, and cryptography.
