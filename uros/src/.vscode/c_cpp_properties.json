@@ -7,7 +7,7 @@
       },
       "includePath": [
         "/home/max/Documents/thesis-sync/code/hexumi_uros_ws_2/uros_ws/install/servo2040_uros/include/**",
-        "/opt/ros/humble/include/**",
+        "/opt/ros/jazzy/include/**",
         "/usr/include/**"
       ],
       "name": "ROS",

@@ -20,7 +20,7 @@ The `hexumi-base` branch contains minimal code meant to be run directly on the r
 For in-depth insights into the development process and detailed build instructions, please refer to my 2023 paper, "Design and Simulation of a Six-Legged Walking Robot", accessible on my [ResearchGate profile](https://www.researchgate.net/profile/Maksymilian-Firkowski/research). Even if you don't intend to replicate Hexumi, the paper provides a valuable roadmap for designing your robot.
 
 ## Dependencies
-Software in this repo requires ROS2 Humble to run.
+Software in this repo requires ROS 2 Jazzy (Ubuntu 24.04) to run. The micro-ROS agent on the Raspberry Pi and the micro-ROS library in the servo driver firmware must also be built for Jazzy.
 
 To use the Pro Controller, you will have to install [joycond](https://github.com/DanielOgorchock/joycond) on your Raspberry Pi.
 

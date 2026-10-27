@@ -17,6 +17,14 @@
   <depend>orocos_kdl_vendor</depend>
   <depend>kdl_parser</depend>
   <depend>urdf</depend>
+  <exec_depend>hexumi_description</exec_depend>
+  <exec_depend>hexumi_kinematics</exec_depend>
+  <exec_depend>hexumi_teleop_joy</exec_depend>
+  <exec_depend>joy</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>joint_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -7,8 +7,8 @@
 #include <hexumi_msgs/msg/hexapod_motion.hpp>
 #include <hexumi_msgs/msg/meta_commands.hpp>
 
-#include <Eigen/Geometry>
 #include <cmath>
+#include <vector>
 
 #define PRO_CONTROLLER_AXIS_STICK_LEFT_HORIZONTAL   0
 #define PRO_CONTROLLER_AXIS_STICK_LEFT_VERTICAL     1
@@ -38,8 +38,7 @@ public:
 
 private:
 
-    std::shared_ptr<rclcpp::AsyncParametersClient> parameters_client_;
-    void set_params_from_global_param_server(std::shared_future<std::vector<rclcpp::Parameter>>);
+    void load_params_from_global_param_server();
 
     rclcpp::Publisher<hexumi_msgs::msg::BodyControl>::SharedPtr   body_control_pub_;
     rclcpp::Publisher<hexumi_msgs::msg::HexapodMotion>::SharedPtr hexapod_motion_pub_;
@@ -51,9 +50,9 @@ private:
     hexumi_msgs::msg::HexapodMotion hexapod_motion;
     hexumi_msgs::msg::MetaCommands  meta_cmd;
  
-    bool servo_power_flag;
-    bool start_flag;
-    bool imu_flag;
+    bool servo_power_flag = false;
+    bool start_flag = false;
+    bool imu_flag = false;
 
     void joyCallback(const sensor_msgs::msg::Joy::SharedPtr);
 
@@ -68,6 +67,7 @@ private:
     void setGaitWave();
     void setGaitRipple();
     void setGaitTripod();
+    void stopMotion();
 
     void sendHexapodMotionData(const sensor_msgs::msg::Joy::SharedPtr);
 
@@ -78,27 +78,30 @@ private:
     void setOmniTwist(double, double);
 
     // joy control flags
-    bool servo_power_off_command_flag;
-    bool servo_power_on_command_flag;
-    bool start_command_flag;
-    bool imu_on_off_command_flag;
-    bool omnidirectional_command_flag;
-    bool wave_gait_command_flag;
-    bool ripple_gait_command_flag;
-    bool tripod_gait_command_flag;
+    bool servo_power_off_command_flag = false;
+    bool servo_power_on_command_flag = false;
+    bool start_command_flag = false;
+    bool imu_on_off_command_flag = false;
+    bool omnidirectional_command_flag = false;
+    bool wave_gait_command_flag = false;
+    bool ripple_gait_command_flag = false;
+    bool tripod_gait_command_flag = false;
 
     // set joy control flags
     void setJoyFlags(const sensor_msgs::msg::Joy::SharedPtr&);
+    // true only on the message where the button goes from released to pressed
+    bool pressed(const sensor_msgs::msg::Joy::SharedPtr&, int button) const;
+    std::vector<int> previous_buttons;
 
     std::chrono::time_point<std::chrono::steady_clock> startTime;
 
-    double max_lin_velocity;
-    double max_ang_velocity;
-    double max_body_y_euler;
-    double max_body_z_euler;
-    double max_body_x;
-    double max_body_y;
-    double max_body_velocity_z;
+    double max_lin_velocity = 0.0;
+    double max_ang_velocity = 0.0;
+    double max_body_y_euler = 0.0;
+    double max_body_z_euler = 0.0;
+    double max_body_x = 0.0;
+    double max_body_y = 0.0;
+    double max_body_velocity_z = 0.0;
 
     static constexpr int axis_left_y        = PRO_CONTROLLER_AXIS_STICK_LEFT_HORIZONTAL;
     static constexpr int axis_left_x        = PRO_CONTROLLER_AXIS_STICK_LEFT_VERTICAL;
@@ -122,5 +125,8 @@ private:
     static constexpr int button_stick_L     = PRO_CONTROLLER_BUTTON_STICK_LEFT;
     static constexpr int button_stick_R     = PRO_CONTROLLER_BUTTON_STICK_RIGHT;
 
-    double press_to_power_on_duration;
+    static constexpr int num_axes           = 6;
+    static constexpr int num_buttons        = 14;
+
+    double press_to_power_on_duration = 3.0;
 };

@@ -6,7 +6,7 @@
         "limitSymbolsToIncludedHeaders": false
       },
       "includePath": [
-        "/opt/ros/humble/include/**",
+        "/opt/ros/jazzy/include/**",
         "/home/max/hexumi/main/src/hexumi_description/include/**",
         "/home/max/hexumi/main/src/hexumi_kinematics/include/**",
         "/home/max/hexumi/main/src/hexumi_msgs/include/**",

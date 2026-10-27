@@ -7,47 +7,21 @@ endif ()
 
 add_library(micro_ros STATIC)
 
-# Add include directory
-target_include_directories(micro_ros PUBLIC 
-    ${MICRO_ROS_PATH}/include
-    ${MICRO_ROS_PATH}/include/rcl
-    ${MICRO_ROS_PATH}/include/rcutils
-    ${MICRO_ROS_PATH}/include/actionlib_msgs
-	${MICRO_ROS_PATH}/include/action_msgs
-	${MICRO_ROS_PATH}/include/builtin_interfaces
-	${MICRO_ROS_PATH}/include/composition_interfaces
-	${MICRO_ROS_PATH}/include/diagnostic_msgs
-	${MICRO_ROS_PATH}/include/example_interfaces
-	${MICRO_ROS_PATH}/include/geometry_msgs
-	${MICRO_ROS_PATH}/include/servo2040_uros
-	${MICRO_ROS_PATH}/include/lifecycle_msgs
-	${MICRO_ROS_PATH}/include/micro_ros_msgs
-	${MICRO_ROS_PATH}/include/nav_msgs
-	${MICRO_ROS_PATH}/include/rcl
-	${MICRO_ROS_PATH}/include/rcl_action
-	${MICRO_ROS_PATH}/include/rcl_interfaces
-	${MICRO_ROS_PATH}/include/rcl_lifecycle
-	${MICRO_ROS_PATH}/include/rcl_logging_interface
-	${MICRO_ROS_PATH}/include/rcutils
-	${MICRO_ROS_PATH}/include/rmw
-	${MICRO_ROS_PATH}/include/ros2_temperature
-	${MICRO_ROS_PATH}/include/rosgraph_msgs
-	${MICRO_ROS_PATH}/include/rosidl_runtime_c
-	${MICRO_ROS_PATH}/include/rosidl_typesupport_c
-	${MICRO_ROS_PATH}/include/rosidl_typesupport_interface
-	${MICRO_ROS_PATH}/include/rosidl_typesupport_introspection_c
-	${MICRO_ROS_PATH}/include/sensor_msgs
-	${MICRO_ROS_PATH}/include/shape_msgs
-	${MICRO_ROS_PATH}/include/statistics_msgs
-	${MICRO_ROS_PATH}/include/std_msgs
-	${MICRO_ROS_PATH}/include/std_srvs
-	${MICRO_ROS_PATH}/include/stereo_msgs
-	${MICRO_ROS_PATH}/include/test_msgs
-	${MICRO_ROS_PATH}/include/tracetools
-	${MICRO_ROS_PATH}/include/trajectory_msgs
-	${MICRO_ROS_PATH}/include/unique_identifier_msgs
-	${MICRO_ROS_PATH}/include/visualization_msgs
-)
+# Add include directories. micro_ros_setup installs most ROS packages as
+# include/<pkg>/<pkg>/*.h, so each of those needs its own include path. The set
+# changes between distros (Jazzy added service_msgs, type_description_interfaces,
+# rosidl_dynamic_typesupport, ...), so discover them instead of listing them.
+if(NOT EXISTS "${MICRO_ROS_PATH}/include")
+    message(FATAL_ERROR "micro-ROS headers not found in '${MICRO_ROS_PATH}/include'. Build the micro-ROS library first (uros_ws: ros2 run micro_ros_setup build_firmware.sh ...).")
+endif()
+set(MICRO_ROS_INCLUDE_DIRS "${MICRO_ROS_PATH}/include")
+file(GLOB MICRO_ROS_INCLUDE_PKGS LIST_DIRECTORIES true RELATIVE "${MICRO_ROS_PATH}/include" "${MICRO_ROS_PATH}/include/*")
+foreach(pkg ${MICRO_ROS_INCLUDE_PKGS})
+    if(IS_DIRECTORY "${MICRO_ROS_PATH}/include/${pkg}/${pkg}")
+        list(APPEND MICRO_ROS_INCLUDE_DIRS "${MICRO_ROS_PATH}/include/${pkg}")
+    endif()
+endforeach()
+target_include_directories(micro_ros PUBLIC ${MICRO_ROS_INCLUDE_DIRS})
 
 # Add the standard library to the build
 target_link_libraries(micro_ros PUBLIC pico_stdlib microros)
