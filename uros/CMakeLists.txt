@@ -21,7 +21,6 @@ include(micro_ros.cmake)
 #Add main source directory
 add_subdirectory(src)
 
-# Optional personal deploy hook, only runs if the script exists
 set(PICO_DEPLOY_SCRIPT "$ENV{HOME}/bin/picoDeploy.sh" CACHE FILEPATH "Script called with the .elf on install")
 if(EXISTS "${PICO_DEPLOY_SCRIPT}")
     install(CODE "execute_process(COMMAND ${PICO_DEPLOY_SCRIPT} ${CMAKE_CURRENT_BINARY_DIR}/src/${NAME}.elf)")

@@ -39,7 +39,6 @@ echo FIRMWARE: $FW_DIR
 echo Building Firmware Structure for $ROS_PKG
 TARGET="${FW_DIR}/mcu_ws/${ROS_PKG}"
 mkdir -p "${TARGET}"
-# srv/ and include/ are optional, only copy what the package actually has
 for d in msg srv include scripts
 do
     if [ -d "${PKG_DIR}/${d}" ]

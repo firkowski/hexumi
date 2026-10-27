@@ -19,7 +19,6 @@ TeleopJoy::TeleopJoy()
     meta_cmd_pub_       = create_publisher<hexumi_msgs::msg::MetaCommands>("/teleop/meta_cmd", 1);        // power, stand up, sit down stuff
 }
 
-// Blocks until the global parameter server answers, so the joystick is never mapped with unset limits.
 void TeleopJoy::load_params_from_global_param_server() {
     auto client_node = std::make_shared<rclcpp::Node>(std::string(this->get_name()) + "_param_client");
     auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(client_node, "/global_parameter_server");
@@ -111,7 +110,6 @@ void TeleopJoy:: startStop() {
         stopMotion();
 }
 
-// zero the motion command so the robot does not resume walking with a stale twist after standing up
 void TeleopJoy::stopMotion() {
     hexapod_motion.motion_twist = geometry_msgs::msg::Twist();
     body_control = hexumi_msgs::msg::BodyControl();

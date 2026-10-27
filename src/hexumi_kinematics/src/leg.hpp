@@ -109,13 +109,10 @@ public:
 
     void generateSupportPath();
     void generateTransferPathCenter(double, double);
-    // replaces the current trajectory with path + profile; the leg takes ownership of both
     void setSegmentTrajectory(KDL::Path*, KDL::VelocityProfile*);
 
     void resetDuration() {duration = 0;}
 
-    // traj owns the path and velocity profile of the current trajectory (KDL aggregate semantics),
-    // velprof is a non-owning view into it and is nullptr for stationary trajectories
     std::unique_ptr<KDL::Trajectory> traj;
     KDL::VelocityProfile* velprof = nullptr;
     
@@ -196,8 +193,6 @@ inline bool Leg::setPositionB(KDL::Vector p_b) {
 }
 
 inline bool Leg::isInWorkspaceL(KDL::Vector p_l) {
-    // reach of the femur-tibia chain is measured from the femur joint, which sits coxa_length
-    // away from the hip axis; outside of [|t - f|, t + f] the IK below would take acos() of |x| > 1
     double L = std::hypot(p_l.x(), p_l.y()) - coxa_length;
     double reach = std::hypot(L, p_l.z());
     double yaw = std::atan2(p_l.y(), p_l.x());
@@ -254,7 +249,7 @@ inline void Leg::setStationaryTrajectory() {
 inline void Leg::setSegmentTrajectory(KDL::Path* path, KDL::VelocityProfile* profile) {
     profile->SetProfile(0.0, path->PathLength());
     velprof = profile;
-    traj = std::make_unique<KDL::Trajectory_Segment>(path, profile); // takes ownership of both
+    traj = std::make_unique<KDL::Trajectory_Segment>(path, profile);
 }
 
 inline void Leg::generateSupportPath() {
@@ -266,7 +261,6 @@ inline void Leg::generateSupportPath() {
         return;
     }
 
-    //yaw rate non-zero -> arc around the instantaneous center of rotation
     if(!KDL::Equal(motion_twist.rot.z(), 0.0, KDL::epsilon)) {
         double wz = motion_twist.rot.z();
         KDL::Vector rotcenter_b = KDL::Vector(-motion_twist.vel.y() / wz,
@@ -384,6 +378,5 @@ inline void Leg::generateTransferPathCenter(double height, double transfer_durat
         setStationaryTrajectory();
         return;
     }
-    // trapezoidal profile whose duration is exactly transfer_duration
     setSegmentTrajectory(path, new KDL::VelocityProfile_Trap(2*S/transfer_duration, 4*S/std::pow(transfer_duration,2)));
 }

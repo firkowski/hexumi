@@ -37,7 +37,7 @@ private:
     void load_params_from_global_param_server();
 
     int num_legs = 0;
-    int num_joints = 0; // total number of joints, num_legs * joints per leg
+    int num_joints = 0;
     std::vector<std::string> leg_suffixes;
     float coxa_length = 0.0f, femur_length = 0.0f, tibia_length = 0.0f;
     std::vector<Leg> legs;
@@ -55,9 +55,6 @@ private:
     rclcpp::Subscription<servo2040_uros::msg::FeetContacts>::SharedPtr  feet_contacts_sub_;
     rclcpp::TimerBase::SharedPtr timer_;
 
-    // The gait runs blocking loops inside the timer callback. Subscriptions live in their own
-    // callback group so a multi-threaded executor keeps receiving commands (e.g. power off)
-    // while a step is in progress.
     rclcpp::CallbackGroup::SharedPtr command_cb_group_;
     rclcpp::CallbackGroup::SharedPtr control_cb_group_;
 
@@ -69,12 +66,10 @@ private:
     void timer_callback();
     void publish_joint_states();
 
-    // written by command callbacks, polled by the control loop
     std::atomic<bool> is_power_on{false};
     std::atomic<bool> is_ready{false};
     std::atomic<bool> imu_status{false};
 
-    // latest commands, guarded by command_mutex_ and copied into the control state once per tick
     std::mutex command_mutex_;
     KDL::Frame cmd_body_pose = KDL::Frame::Identity();
     KDL::Twist cmd_body_twist = KDL::Twist::Zero();
@@ -83,7 +78,6 @@ private:
     bool cmd_is_omnidirectional = false;
     void fetch_commands();
 
-    // control state, only touched by the control loop
     bool is_sitting = true;
 
     KDL::Frame body_pose = KDL::Frame::Identity();
@@ -103,16 +97,14 @@ private:
 
     bool is_in_null_pos = false;
 
-    // moves every leg from its sitting position to its null position (or back) via a point above/below it
     void move_legs_vertically_first(bool standing_up);
-    // samples all legs' trajectories from 0 to duration (inclusive), publishing every dt
     bool play_trajectories(const std::vector<int>& leg_ids, double duration, double dt, bool abortable);
 
     void sit_down();
     void stand_up();
 
     void move_robot();
-    bool move_tripod(); // false if the step was aborted
+    bool move_tripod();
 
     void move_body();
 
