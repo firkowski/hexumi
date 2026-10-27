@@ -7,10 +7,7 @@ endif ()
 
 add_library(micro_ros STATIC)
 
-# Add include directories. micro_ros_setup installs most ROS packages as
-# include/<pkg>/<pkg>/*.h, so each of those needs its own include path. The set
-# changes between distros (Jazzy added service_msgs, type_description_interfaces,
-# rosidl_dynamic_typesupport, ...), so discover them instead of listing them.
+# Add include directory
 if(NOT EXISTS "${MICRO_ROS_PATH}/include")
     message(FATAL_ERROR "micro-ROS headers not found in '${MICRO_ROS_PATH}/include'. Build the micro-ROS library first (uros_ws: ros2 run micro_ros_setup build_firmware.sh ...).")
 endif()

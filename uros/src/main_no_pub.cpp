@@ -90,7 +90,6 @@ std::vector<std::vector<int>> pulses = {
     };
 
 
-// index in servo2040_uros/JointAngles -> servo channel
 constexpr std::array<int, NUM_SERVOS> servo_IDs {
 	SERVO_L1C, SERVO_L1F, SERVO_L1T,
 	SERVO_L2C, SERVO_L2F, SERVO_L2T,
@@ -180,7 +179,6 @@ void subscription_callback(const void * msgin)
 	if (msg == NULL) 
 		return;
 
-	// reject the whole command if any angle is NaN/inf, so the legs never get a partial update
 	for (size_t i = 0; i < NUM_SERVOS; i++) {
 		if (!std::isfinite(msg->joint_angles[i]))
 			return;
@@ -287,7 +285,6 @@ int main()
     	      next_ping = make_timeout_time_ms(AGENT_PING_PERIOD_MS);
     	      break;
     	    case AGENT_CONNECTED:
-    	      // spin in short slices (rclc_executor_spin never returns) so a lost agent is noticed
     	      rclc_executor_spin_some(&executor, RCL_MS_TO_NS(EXECUTOR_SPIN_TIMEOUT_MS));
     	      if (absolute_time_diff_us(next_ping, get_absolute_time()) >= 0) {
     	        state = pingAgent(100, 3) ? AGENT_CONNECTED : AGENT_DISCONNECTED;

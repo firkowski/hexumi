@@ -78,7 +78,7 @@ namespace KDL {
         if (angle * radius < epsilon && !test) {
             if (aggregate) {
                 delete orient;
-                orient = nullptr; // the destructor runs too if this object already exists
+                orient = nullptr;
             }
             throw Error_MotionPlanning_Circle_No_Plane();
         }
@@ -108,11 +108,11 @@ namespace KDL {
         return transform * start_pose;
     }
 
-    inline Twist Path_Arc::Vel(double /*s*/,double /*sd*/) const {
+    inline Twist Path_Arc::Vel(double,double) const {
         return Twist::Zero();
     }
 
-    inline Twist Path_Arc::Acc(double /*s*/,double /*sd*/,double /*sdd*/) const {
+    inline Twist Path_Arc::Acc(double,double,double) const {
         return Twist::Zero();
     }
 
@@ -200,11 +200,11 @@ namespace KDL {
                              (1 - std::cos((2*M_PIl)*u))                                * height / 2)) * start_pose;
     }
 
-    inline Twist Path_Cycloid::Vel(double /*s*/, double /*sd*/) const {
+    inline Twist Path_Cycloid::Vel(double, double) const {
         return Twist::Zero();
     }
 
-    inline Twist Path_Cycloid::Acc(double /*s*/, double /*sd*/, double /*sdd*/) const {
+    inline Twist Path_Cycloid::Acc(double, double, double) const {
         return Twist::Zero();
     }
 
@@ -212,7 +212,7 @@ namespace KDL {
         return new Path_Cycloid(start_pose, end_pos, height);
     }
 
-    inline void Path_Cycloid::Write(std::ostream& /*os*/) {
+    inline void Path_Cycloid::Write(std::ostream&) {
         return;
     }
 

@@ -35,8 +35,6 @@ Kinematics::Kinematics()
         std::chrono::milliseconds(10), std::bind(&Kinematics::timer_callback, this), control_cb_group_);
 }
 
-// Blocks until the global parameter server answers. A throwaway node is used for the client
-// because this node cannot be spun (or shared_from_this()'d) from inside its own constructor.
 void Kinematics::load_params_from_global_param_server() {
     auto client_node = std::make_shared<rclcpp::Node>(std::string(this->get_name()) + "_param_client");
     auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(client_node, "/global_parameter_server");
@@ -96,7 +94,6 @@ void Kinematics::load_params_from_global_param_server() {
 
     transfer_height = p.at("transfer_height").as_double();
 
-    // per-leg parameters are looked up by suffix so the leg order is defined by leg_suffixes alone
     std::vector<std::string> leg_param_names;
     for (auto& suffix : leg_suffixes) {
         leg_param_names.push_back(suffix + "_origin");
@@ -257,7 +254,6 @@ bool Kinematics::play_trajectories(const std::vector<int>& leg_ids, double durat
     for (double t = 0.0; ; t += dt) {
         if (!rclcpp::ok() || (abortable && (!is_ready || !is_power_on)))
             return false;
-        // the last sample is taken exactly at the end so every leg reaches its target
         double t_clamped = std::min(t, duration);
         for (int i : leg_ids) {
             legs[i].setPositionB(legs[i].traj->Pos(t_clamped).p);
@@ -276,7 +272,6 @@ void Kinematics::move_legs_vertically_first(bool standing_up) {
     for (int i = 0; i < num_legs; i++) {
         KDL::Vector sitting = legs[i].getSittingPositionB();
         KDL::Vector null    = legs[i].getNullPositionB();
-        // sitting down starts wherever the leg is, which is not the null position if a step was aborted
         KDL::Vector start   = standing_up ? sitting : legs[i].getCurrentPositionB();
         KDL::Vector end     = standing_up ? null    : sitting;
         KDL::Vector via     = standing_up ? KDL::Vector(null.x(), null.y(), sitting.z())
@@ -284,14 +279,12 @@ void Kinematics::move_legs_vertically_first(bool standing_up) {
 
         auto path = new KDL::Path_RoundedComposite(standing_up ? 0.003 : 0.0003, 0.01, new KDL::RotationalInterpolation_SingleAxis());
         path->Add(KDL::Frame(KDL::Rotation::Identity(), start));
-        // consecutive coincident points make Path_RoundedComposite throw
         if (!KDL::Equal(via, start, 1e-6) && !KDL::Equal(via, end, 1e-6))
             path->Add(KDL::Frame(KDL::Rotation::Identity(), via));
         path->Add(KDL::Frame(KDL::Rotation::Identity(), end));
         path->Finish();
         legs[i].setSegmentTrajectory(path, new KDL::VelocityProfile_Trap(0.5, 0.1));
 
-        // legs have different sitting radii, so wait for the slowest one
         duration = std::max(duration, legs[i].traj->Duration());
         all_legs.push_back(i);
     }
@@ -315,7 +308,6 @@ void Kinematics::move_robot() {
     switch (gait_type) {
         case hexumi_msgs::msg::HexapodMotion::WAVE_GAIT:
         case hexumi_msgs::msg::HexapodMotion::RIPPLE_GAIT:
-            // wave and ripple gaits are not implemented yet, walk with the tripod gait instead
             if (!warned_unsupported_gait) {
                 RCLCPP_WARN(this->get_logger(), "Gait %d is not implemented, falling back to the tripod gait.", gait_type);
                 warned_unsupported_gait = true;
@@ -323,7 +315,7 @@ void Kinematics::move_robot() {
             [[fallthrough]];
         case hexumi_msgs::msg::HexapodMotion::TRIPOD_GAIT:
             if (!move_tripod())
-                break; // step aborted, keep the phase so the legs on the ground stay the support set
+                break;
             Leg::wavePhase = 0;
             Leg::ripplePhase = (Leg::ripplePhase + 1) % 6;
             Leg::tripodPhase = (Leg::tripodPhase + 1) % 2;
@@ -414,7 +406,6 @@ void Kinematics::center_legs() {
 
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
-    // KDL's default tolerance (1e-6 m) is too coarse for the small leg paths used here
     KDL::epsilon = 1e-9;
     try {
         auto node = std::make_shared<Kinematics>();

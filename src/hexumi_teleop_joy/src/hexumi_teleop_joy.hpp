@@ -89,7 +89,6 @@ private:
 
     // set joy control flags
     void setJoyFlags(const sensor_msgs::msg::Joy::SharedPtr&);
-    // true only on the message where the button goes from released to pressed
     bool pressed(const sensor_msgs::msg::Joy::SharedPtr&, int button) const;
     std::vector<int> previous_buttons;
 

@@ -9,7 +9,7 @@ def generate_launch_description():
         package='joy',
         executable='joy_node',
         parameters=[
-                {'device_id': 0},  # first joystick, i.e. /dev/input/js0
+                {'device_id': 0},
                 {'deadzone': 0.1}
             ]
     ) 
