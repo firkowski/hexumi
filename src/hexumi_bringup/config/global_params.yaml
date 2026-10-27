@@ -1,6 +1,6 @@
 global_parameter_server:
   ros__parameters:
-    robot_description: "$(find-pkg-share hexumi_description)/urdf/hexumi.xacro"
+    # robot_description is passed in by the launch file (xacro output); a path here would not be expanded
 
     robot_name: "Hexumi"
 

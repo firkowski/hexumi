@@ -24,6 +24,6 @@ ament_package()
 
 install(
   PROGRAMS
-    scripts/create_fwws.sh
+    scripts/cp_pkg_to_firmware.sh
   DESTINATION lib/${PROJECT_NAME}
 )

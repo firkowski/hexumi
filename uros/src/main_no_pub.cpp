@@ -4,15 +4,14 @@
 #include "rclc/rclc.h"
 
 #include <time.h>
+#include <array>
 #include <vector>
 #include <memory>
-#include <map>
 #include <cmath>
 
 #include "servo2040_uros/msg/feet_contacts.h"
 #include "servo2040_uros/msg/current.h"
 #include "servo2040_uros/msg/joint_angles.h"
-#include "sensor_msgs/msg/joint_state.h"
 
 extern "C"{
 #include <rcl/rcl.h>
@@ -53,6 +52,10 @@ extern "C"{
 #define SERVO_R3T 17                                                                                                                                                                                                                     //12
 
 #define WIDE_ANGLE_RANGE 180
+#define MAX_SERVO_ANGLE 90.0f
+
+#define AGENT_PING_PERIOD_MS 500
+#define EXECUTOR_SPIN_TIMEOUT_MS 10
 
 #define SENSOR_L1 0
 #define SENSOR_L2 1
@@ -87,34 +90,19 @@ std::vector<std::vector<int>> pulses = {
     };
 
 
-std::map<int, int> servo_IDs {
-	{0, SERVO_L1C},
-	{1, SERVO_L1F},
-	{2, SERVO_L1T},
-	{3, SERVO_L2C},
-	{4, SERVO_L2F},
-	{5, SERVO_L2T},
-	{6, SERVO_L3C},
-	{7, SERVO_L3F},
-	{8, SERVO_L3T},
-	{9, SERVO_R3C},
-	{10, SERVO_R3F},
-	{11, SERVO_R3T},
-	{12, SERVO_R2C},
-	{13, SERVO_R2F},
-	{14, SERVO_R2T},
-	{15, SERVO_R1C},
-	{16, SERVO_R1F},
-	{17, SERVO_R1T},
+// index in servo2040_uros/JointAngles -> servo channel
+constexpr std::array<int, NUM_SERVOS> servo_IDs {
+	SERVO_L1C, SERVO_L1F, SERVO_L1T,
+	SERVO_L2C, SERVO_L2F, SERVO_L2T,
+	SERVO_L3C, SERVO_L3F, SERVO_L3T,
+	SERVO_R3C, SERVO_R3F, SERVO_R3T,
+	SERVO_R2C, SERVO_R2F, SERVO_R2T,
+	SERVO_R1C, SERVO_R1F, SERVO_R1T,
 };
 
-std::map<int, int> sensor_IDs {
-	{0,  SENSOR_L1},
-	{1,  SENSOR_L2},
-	{2,  SENSOR_L3},
-	{3,  SENSOR_R1},
-	{4,  SENSOR_R2},
-	{5,  SENSOR_R3}
+constexpr std::array<int, NUM_LEGS> sensor_IDs {
+	SENSOR_L1, SENSOR_L2, SENSOR_L3,
+	SENSOR_R1, SENSOR_R2, SENSOR_R3,
 };
 
 rcl_publisher_t    feet_contacts_pub_;
@@ -124,9 +112,6 @@ servo2040_uros__msg__FeetContacts   feet_contacts_msg;
 servo2040_uros__msg__Current current_msg;
 servo2040_uros__msg__JointAngles    joint_angles_msg;
 
-rcl_publisher_t	joint_state_pub_;
-sensor_msgs__msg__JointState		 joint_state_msg;
-
 enum states {
   WAITING_AGENT,
   AGENT_AVAILABLE,
@@ -134,7 +119,6 @@ enum states {
   AGENT_DISCONNECTED
 } state;
 
-rcl_timer_t timer;
 rcl_node_t node;
 rcl_allocator_t allocator;
 rclc_support_t support;
@@ -187,23 +171,6 @@ void init() {
 	for(auto i = 0u; i < servo2040::NUM_SENSORS; i++) {
    		mux.configure_pulls(servo2040::SENSOR_1_ADDR + i, false, true);
   	}
-
-	joint_state_msg.position.capacity = NUM_SERVOS;
-	joint_state_msg.position.data = (double*) malloc(joint_state_msg.position.capacity * sizeof(double));
-	joint_state_msg.position.size = 0;
-
-	for (int i = 0; i < NUM_SERVOS; i++) {
-		joint_state_msg.position.data[i] = 0.0;
-		joint_state_msg.position.size++;
-	}
-
-	rcl_ret_t feet_contacts_ret = rcl_publish(&joint_state_pub_, &joint_state_msg, NULL);
-
-}
-
-void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
-{	
-	
 }
 
 void subscription_callback(const void * msgin)
@@ -213,21 +180,23 @@ void subscription_callback(const void * msgin)
 	if (msg == NULL) 
 		return;
 
+	// reject the whole command if any angle is NaN/inf, so the legs never get a partial update
+	for (size_t i = 0; i < NUM_SERVOS; i++) {
+		if (!std::isfinite(msg->joint_angles[i]))
+			return;
+	}
+
     for (size_t i = 0; i < NUM_SERVOS; i++) {
 		int j = servo_IDs[i];
-		float deg = static_cast<float>(msg->joint_angles.data[i]) * 180.0 / M_PI;
-		//joint_state_msg.position.data[i] = deg;
+		float deg = msg->joint_angles[i] * 180.0f / static_cast<float>(M_PI);
 
 		float angle = angle_map(j, deg);
+		angle = std::fmin(std::fmax(angle, -MAX_SERVO_ANGLE), MAX_SERVO_ANGLE);
 		servos.value(j, angle);
     }
-	//rcl_ret_t feet_contacts_ret = rcl_publish(&joint_state_pub_, &joint_state_msg, NULL);
 }
 
-bool pingAgent(){
-    const int timeout_ms = 1000;
-    const uint8_t attempts = 10;
-
+bool pingAgent(int timeout_ms = 1000, uint8_t attempts = 10){
     rcl_ret_t ret = rmw_uros_ping_agent(timeout_ms, attempts);
 
     if (ret != RCL_RET_OK){
@@ -236,24 +205,21 @@ bool pingAgent(){
     return true;
 }
 
-void createEntities() {
+bool createEntities() {
 
 	allocator = rcl_get_default_allocator();
-	rclc_support_init(&support, 0, NULL, &allocator);
+	if (rclc_support_init(&support, 0, NULL, &allocator) != RCL_RET_OK)
+		return false;
 
-	rclc_node_init_default(&node, "servo2040_node", "", &support);
+	if (rclc_node_init_default(&node, "servo2040_node", "", &support) != RCL_RET_OK)
+		return false;
 
-	rclc_subscription_init_default(
+	if (rclc_subscription_init_default(
 		&joint_angles_sub_,
 		&node,
 		ROSIDL_GET_MSG_TYPE_SUPPORT(servo2040_uros, msg, JointAngles),
-		"/joint_angles");
-
-	rclc_timer_init_default(
-		&timer,
-		&support,
-		RCL_MS_TO_NS(100),
-		timer_callback);
+		"/joint_angles") != RCL_RET_OK)
+		return false;
 
 	// create publishers
 	/*
@@ -263,26 +229,21 @@ void createEntities() {
 		ROSIDL_GET_MSG_TYPE_SUPPORT(servo2040_uros, msg, FeetContacts),
 		"/servo2040/feet_contacts");
 
-	rclc_publisher_init_default(
-		&joint_state_pub_,
-		&node,
-		ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, JointState),
-		"/servo2040/joint_states");
-    
     rclc_publisher_init_default(
 		&current_pub_,
 		&node,
 		ROSIDL_GET_MSG_TYPE_SUPPORT(servo2040_uros, msg, Current),
 		"/servo2040/current");
 	*/
-	rclc_executor_init(&executor, &support.context, 2, &allocator);
-	rclc_executor_add_timer(&executor, &timer);
+	executor = rclc_executor_get_zero_initialized_executor();
+	if (rclc_executor_init(&executor, &support.context, 1, &allocator) != RCL_RET_OK)
+		return false;
 
-	rclc_executor_add_subscription(&executor,
+	return rclc_executor_add_subscription(&executor,
 			&joint_angles_sub_,
 			&joint_angles_msg,
 			&subscription_callback,
-			ON_NEW_DATA);
+			ON_NEW_DATA) == RCL_RET_OK;
 }
 
 void destroyEntities(){
@@ -291,9 +252,7 @@ void destroyEntities(){
 
 	//rcl_publisher_fini(&feet_contacts_pub_, &node);
 	//rcl_publisher_fini(&current_pub_, &node);
-	//rcl_publisher_fini(&joint_state_pub_, &node);
 	rcl_subscription_fini(&joint_angles_sub_, &node);
-	rcl_timer_fini(&timer);
 	rclc_executor_fini(&executor);
 	rcl_node_fini(&node);
 	rclc_support_fini(&support);
@@ -316,6 +275,7 @@ int main()
 	);
 	
   	state = WAITING_AGENT;
+	absolute_time_t next_ping = get_absolute_time();
 
 	while (true){
     	switch (state) {
@@ -323,13 +283,15 @@ int main()
     	      state = pingAgent() ? AGENT_AVAILABLE : WAITING_AGENT;
     	      break;
     	    case AGENT_AVAILABLE:
-    	      createEntities();
-    	      state = AGENT_CONNECTED ;
+    	      state = createEntities() ? AGENT_CONNECTED : AGENT_DISCONNECTED;
+    	      next_ping = make_timeout_time_ms(AGENT_PING_PERIOD_MS);
     	      break;
     	    case AGENT_CONNECTED:
-    	      state = pingAgent() ? AGENT_CONNECTED : AGENT_DISCONNECTED;
-    	      if (state == AGENT_CONNECTED) {
-    	        rclc_executor_spin(&executor);
+    	      // spin in short slices (rclc_executor_spin never returns) so a lost agent is noticed
+    	      rclc_executor_spin_some(&executor, RCL_MS_TO_NS(EXECUTOR_SPIN_TIMEOUT_MS));
+    	      if (absolute_time_diff_us(next_ping, get_absolute_time()) >= 0) {
+    	        state = pingAgent(100, 3) ? AGENT_CONNECTED : AGENT_DISCONNECTED;
+    	        next_ping = make_timeout_time_ms(AGENT_PING_PERIOD_MS);
     	      }
     	      break;
     	    case AGENT_DISCONNECTED:

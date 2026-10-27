@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 
-#include <uxr/client/profile/transport/custom/custom_transport.h>
 #include <time.h>
+
+#include "pico_uart_transports.h"
 
 void usleep(uint64_t us)
 {
@@ -30,7 +31,7 @@ bool pico_serial_transport_close(struct uxrCustomTransport * transport)
     return true;
 }
 
-size_t pico_serial_transport_write(struct uxrCustomTransport * transport, uint8_t *buf, size_t len, uint8_t *errcode)
+size_t pico_serial_transport_write(struct uxrCustomTransport * transport, const uint8_t *buf, size_t len, uint8_t *errcode)
 {
     for (size_t i = 0; i < len; i++)
     {
@@ -48,14 +49,14 @@ size_t pico_serial_transport_read(struct uxrCustomTransport * transport, uint8_t
     uint64_t start_time_us = time_us_64();
     for (size_t i = 0; i < len; i++)
     {
-        int64_t elapsed_time_us = timeout * 1000 - (time_us_64() - start_time_us);
-        if (elapsed_time_us < 0)
+        int64_t remaining_time_us = timeout * 1000 - (time_us_64() - start_time_us);
+        if (remaining_time_us < 0)
         {
             *errcode = 1;
             return i;
         }
 
-        int character = getchar_timeout_us(elapsed_time_us);
+        int character = getchar_timeout_us(remaining_time_us);
         if (character == PICO_ERROR_TIMEOUT)
         {
             *errcode = 1;

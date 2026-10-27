@@ -10,11 +10,9 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>rclcpp</depend>
-  <depend>orocos_kdl</depend>
+  <depend>orocos_kdl_vendor</depend>
   <depend>hexumi_msgs</depend>
   <depend>servo2040_uros</depend>
-  <depend>eigen3_cmake_module</depend>
-  <depend>Eigen3</depend>
   <depend>sensor_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>

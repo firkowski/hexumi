@@ -38,17 +38,14 @@ echo FIRMWARE: $FW_DIR
 
 echo Building Firmware Structure for $ROS_PKG
 TARGET="${FW_DIR}/mcu_ws/${ROS_PKG}"
-if [ ! -d ${TARGET} ]
-then
-	mkdir ${TARGET}
-	mkdir ${TARGET}/include
-	mkdir ${TARGET}/msg
-	mkdir ${TARGET}/srv
-	mkdir ${TARGET}/scripts
-fi
-cp -r ${PKG_DIR}/msg ${TARGET} 
-cp -r ${PKG_DIR}/srv ${TARGET}
-cp -r ${PKG_DIR}/include ${TARGET} 
-cp -r ${PKG_DIR}/scripts ${TARGET} 
-cp ${PKG_DIR}/CMakeLists.txt ${TARGET}/
-cp ${PKG_DIR}/package.xml ${TARGET}/
+mkdir -p "${TARGET}"
+# srv/ and include/ are optional, only copy what the package actually has
+for d in msg srv include scripts
+do
+    if [ -d "${PKG_DIR}/${d}" ]
+    then
+        cp -r "${PKG_DIR}/${d}" "${TARGET}"
+    fi
+done
+cp "${PKG_DIR}/CMakeLists.txt" "${TARGET}/"
+cp "${PKG_DIR}/package.xml" "${TARGET}/"

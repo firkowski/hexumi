@@ -1,13 +1,13 @@
 {
     "python.autoComplete.extraPaths": [
-        "/home/max/Documents/thesis-sync/code/hexumi_uros_ws_2/uros_ws/install/servo2040_uros/local/lib/python3.10/dist-packages",
-        "/opt/ros/humble/lib/python3.10/site-packages",
-        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+        "/home/max/Documents/thesis-sync/code/hexumi_uros_ws_2/uros_ws/install/servo2040_uros/local/lib/python3.12/dist-packages",
+        "/opt/ros/jazzy/lib/python3.12/site-packages",
+        "/opt/ros/jazzy/local/lib/python3.12/dist-packages"
     ],
     "python.analysis.extraPaths": [
-        "/home/max/Documents/thesis-sync/code/hexumi_uros_ws_2/uros_ws/install/servo2040_uros/local/lib/python3.10/dist-packages",
-        "/opt/ros/humble/lib/python3.10/site-packages",
-        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+        "/home/max/Documents/thesis-sync/code/hexumi_uros_ws_2/uros_ws/install/servo2040_uros/local/lib/python3.12/dist-packages",
+        "/opt/ros/jazzy/lib/python3.12/site-packages",
+        "/opt/ros/jazzy/local/lib/python3.12/dist-packages"
     ],
     "files.associations": {
         "array": "cpp",

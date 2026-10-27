@@ -19,13 +19,11 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <cmath>
+#include <limits>
 #include <memory>
 
-#define ANGULAR_DEADZONE 0.02
 #define NUM_SAMPLES 200
 #define MAX_DURATION 10
-
-double KDL::epsilon = 1e-9;
 
 class Leg;
 class EllipsoidWorkspace;
@@ -46,11 +44,12 @@ public:
     static KDL::Vector center_l;
     static std::vector<double> axes;
 
+
 private:
     KDL::Vector center_b;
 };
-KDL::Vector EllipsoidWorkspace::center_l = KDL::Vector(0.0, 0.0, 0.0); 
-std::vector<double> EllipsoidWorkspace::axes = {0.0, 0.0, 0.0};
+inline KDL::Vector EllipsoidWorkspace::center_l = KDL::Vector(0.0, 0.0, 0.0);
+inline std::vector<double> EllipsoidWorkspace::axes = {0.0, 0.0, 0.0};
 
 
 class Leg{
@@ -72,21 +71,8 @@ public:
         null_position_b = to_body_frame(null_position_l);
 
         traj_type = support;
-
-        path = new KDL::Path_Point(KDL::Frame(KDL::Rotation::Identity(), current_position_b));
-        velprof = new KDL::VelocityProfile_Rectangular(0.0);
-
         duration = 0;
-
-        KDL::Frame current_frame_b = KDL::Frame::Identity();
-        current_frame_b.p = current_position_b;
-        traj = new KDL::Trajectory_Stationary(KDL::epsilon, current_frame_b);
-    };
-
-    ~Leg() {
-        delete path;
-        delete velprof;
-        delete traj;
+        setStationaryTrajectory();
     };
 
     int getId() const {return id;};
@@ -123,12 +109,15 @@ public:
 
     void generateSupportPath();
     void generateTransferPathCenter(double, double);
+    // replaces the current trajectory with path + profile; the leg takes ownership of both
+    void setSegmentTrajectory(KDL::Path*, KDL::VelocityProfile*);
 
     void resetDuration() {duration = 0;}
 
-    KDL::Path* path;
-    KDL::VelocityProfile* velprof;
-    KDL::Trajectory* traj;
+    // traj owns the path and velocity profile of the current trajectory (KDL aggregate semantics),
+    // velprof is a non-owning view into it and is nullptr for stationary trajectories
+    std::unique_ptr<KDL::Trajectory> traj;
+    KDL::VelocityProfile* velprof = nullptr;
     
     static int tripodPhase;
     static int wavePhase;
@@ -140,8 +129,6 @@ public:
     static KDL::Frame body_pose;
 
 private:
-
-    KDL::RotationalInterpolation_SingleAxis rotinterp;
 
     int id;
     float coxa_length, femur_length, tibia_length;
@@ -161,43 +148,38 @@ private:
 
     void set_joint_angles();
     std::vector<float> current_joint_angles;
-    float coxa_angle, femur_angle, tibia_angle;
+    float coxa_angle = 0.0f, femur_angle = 0.0f, tibia_angle = 0.0f;
 
-    bool singularity_flag;
+    bool singularity_flag = false;
 
-    bool is_active;
+    bool is_active = true;
 
     EllipsoidWorkspace workspace;
 
     enum TrajType {support, transfer} traj_type;
-    KDL::Path* point_path();
+    void setStationaryTrajectory();
     KDL::Path* line_path();
     KDL::Path* arc_path(KDL::Vector);
-    static double path_length;
-    static double path_angle;
 };
 
-double Leg::path_length = 0.0;
-double Leg::path_angle = 0.0;
+inline KDL::Twist Leg::motion_twist = KDL::Twist::Zero();
+inline KDL::Frame Leg::body_pose = KDL::Frame::Identity();
+inline int Leg::tripodPhase = 0;
+inline int Leg::wavePhase = 0;
+inline int Leg::ripplePhase = 0;
 
-KDL::Twist Leg::motion_twist = KDL::Twist::Zero();
-KDL::Frame Leg::body_pose = KDL::Frame::Identity();
-int Leg::tripodPhase = 0;
-int Leg::wavePhase = 0;
-int Leg::ripplePhase = 0;
-
-bool Leg::isInTaskspaceL(KDL::Vector p_l) {
+inline bool Leg::isInTaskspaceL(KDL::Vector p_l) {
     KDL::Vector vec = p_l - workspace.getCenterL();
     return (std::pow(vec.x(), 2) / std::pow(workspace.a()/2, 2) + 
             std::pow(vec.y(), 2) / std::pow(workspace.b()/2, 2) + 
             std::pow(vec.z(), 2) / std::pow(workspace.c()/2, 2)) <= 1;
 }
 
-bool Leg::isInTaskspaceB(KDL::Vector p_b) {
+inline bool Leg::isInTaskspaceB(KDL::Vector p_b) {
     return isInTaskspaceL(to_hip_frame(p_b));
 }
 
-bool Leg::setPositionL(KDL::Vector p_l) {
+inline bool Leg::setPositionL(KDL::Vector p_l) {
     if (isInWorkspaceL(p_l)) {
         current_position_l = p_l;
         current_position_b = to_body_frame(p_l);
@@ -209,29 +191,33 @@ bool Leg::setPositionL(KDL::Vector p_l) {
     }
 }
 
-bool Leg::setPositionB(KDL::Vector p_b) {
+inline bool Leg::setPositionB(KDL::Vector p_b) {
     return setPositionL(to_hip_frame(p_b));
 }
 
-bool Leg::isInWorkspaceL(KDL::Vector p_l) {
-    float leg_radius = p_l.Norm();
+inline bool Leg::isInWorkspaceL(KDL::Vector p_l) {
+    // reach of the femur-tibia chain is measured from the femur joint, which sits coxa_length
+    // away from the hip axis; outside of [|t - f|, t + f] the IK below would take acos() of |x| > 1
+    double L = std::hypot(p_l.x(), p_l.y()) - coxa_length;
+    double reach = std::hypot(L, p_l.z());
+    double yaw = std::atan2(p_l.y(), p_l.x());
 
-    return (   leg_radius                     <= tibia_length + femur_length
-            && leg_radius                     >= tibia_length - femur_length
-            && std::atan2( p_l.y(), p_l.x() ) <= M_PI * 35.0 / 180.0
-            && std::atan2( p_l.y(), p_l.x() ) >= -M_PI * 35.0 / 180.0);
+    return (   reach <= tibia_length + femur_length
+            && reach >= std::abs(tibia_length - femur_length)
+            && yaw   <=  M_PI * 35.0 / 180.0
+            && yaw   >= -M_PI * 35.0 / 180.0);
 }
 
-bool Leg::isInWorkspaceB(KDL::Vector p_b) {
+inline bool Leg::isInWorkspaceB(KDL::Vector p_b) {
     return isInWorkspaceL(to_hip_frame(p_b));
 }
 
-void Leg::setMotionParams(KDL::Twist _motion_twist, KDL::Frame _body_pose) {
+inline void Leg::setMotionParams(KDL::Twist _motion_twist, KDL::Frame _body_pose) {
     Leg::motion_twist = _motion_twist;
     Leg::body_pose = _body_pose;
 }
 
-void Leg::set_joint_angles() {
+inline void Leg::set_joint_angles() {
     float x = current_position_l.x();
     float y = current_position_l.y();
     float z = current_position_l.z();
@@ -260,59 +246,66 @@ void Leg::set_joint_angles() {
 }
 
 // support trajectories
-void Leg::generateSupportPath() {
+inline void Leg::setStationaryTrajectory() {
+    velprof = nullptr;
+    traj = std::make_unique<KDL::Trajectory_Stationary>(KDL::epsilon, KDL::Frame(current_position_b));
+}
+
+inline void Leg::setSegmentTrajectory(KDL::Path* path, KDL::VelocityProfile* profile) {
+    profile->SetProfile(0.0, path->PathLength());
+    velprof = profile;
+    traj = std::make_unique<KDL::Trajectory_Segment>(path, profile); // takes ownership of both
+}
+
+inline void Leg::generateSupportPath() {
     traj_type = support;
     //body twist zero -> stationary
     if(KDL::Equal(motion_twist, KDL::Twist::Zero(), KDL::epsilon)) {
-        this->path = point_path();
-        this->traj = new KDL::Trajectory_Stationary(KDL::epsilon, path->Pos(0));
+        setStationaryTrajectory();
         duration = 0;
         return;
     }
 
-    //body twist.rot non-zero -> arc
-    if(!KDL::Equal(motion_twist.rot, KDL::Vector::Zero(), KDL::epsilon)) {
-        KDL::Vector rotcenter_b = KDL::Vector(0.0, 
-                                           motion_twist.vel.x() / motion_twist.rot.z(),
-                                           current_position_b.z());
+    //yaw rate non-zero -> arc around the instantaneous center of rotation
+    if(!KDL::Equal(motion_twist.rot.z(), 0.0, KDL::epsilon)) {
+        double wz = motion_twist.rot.z();
+        KDL::Vector rotcenter_b = KDL::Vector(-motion_twist.vel.y() / wz,
+                                               motion_twist.vel.x() / wz,
+                                               current_position_b.z());
         double rho = (current_position_b - rotcenter_b).Norm();
-        RCLCPP_INFO(rclcpp::get_logger("traj gen"), "leg %d CoR %f", id, rotcenter_b.y());
+        RCLCPP_DEBUG(rclcpp::get_logger("traj gen"), "leg %d CoR (%f, %f)", id, rotcenter_b.x(), rotcenter_b.y());
         // check if the rotation is not happening around one of the legs. only happens for specific v, omega, and placement of leg 1 o 4
         if (rho <= KDL::epsilon ) {
-            this->path = point_path();
-            this->traj = new KDL::Trajectory_Stationary(KDL::epsilon, this->path->Pos(0));
-            RCLCPP_INFO(rclcpp::get_logger("traj gen"), "leg %d path point, center of rotation", id);
+            setStationaryTrajectory();
+            RCLCPP_DEBUG(rclcpp::get_logger("traj gen"), "leg %d path point, center of rotation", id);
             duration = MAX_DURATION;
             return;
         }
-        this->path = arc_path(rotcenter_b);
-
-        this->velprof = new KDL::VelocityProfile_Rectangular(motion_twist.rot.Norm() * rho);
-        RCLCPP_INFO(rclcpp::get_logger("traj gen"), "leg %d support velocity: %f", id, motion_twist.rot.Norm() * rho);
-        this->velprof->SetProfile(0.0, this->path->PathLength());
-        this->traj = new KDL::Trajectory_Segment(this->path, this->velprof);
+        KDL::Path* path = arc_path(rotcenter_b);
+        if (path == nullptr) {
+            setStationaryTrajectory();
+            return;
+        }
+        setSegmentTrajectory(path, new KDL::VelocityProfile_Rectangular(std::abs(wz) * rho));
         duration = traj->Duration();
-        RCLCPP_INFO(rclcpp::get_logger("traj gen"), "leg %d traj duration: %f", id, traj->Duration());
+        RCLCPP_DEBUG(rclcpp::get_logger("traj gen"), "leg %d traj duration: %f", id, duration);
         return;
     }
 
-    this->path = line_path();
-    this->velprof = new KDL::VelocityProfile_Rectangular(motion_twist.vel.Norm());
-    this->velprof->SetProfile(0.0, this->path->PathLength());
-    this->traj = new KDL::Trajectory_Segment(this->path, this->velprof);
+    KDL::Path* path = line_path();
+    if (path == nullptr) {
+        setStationaryTrajectory();
+        return;
+    }
+    setSegmentTrajectory(path, new KDL::VelocityProfile_Rectangular(motion_twist.vel.Norm()));
     duration = traj->Duration();
 }
 
-KDL::Path* Leg::point_path () {
-    KDL::Frame pose = KDL::Frame(KDL::Rotation::Identity(), current_position_b);
-    return new KDL::Path_Point(pose);
-}
-
-KDL::Path* Leg::line_path() {
+inline KDL::Path* Leg::line_path() {
     int eta = traj_type == support ? -1 : 1;
 
     double phi = std::atan2(motion_twist.vel.y(), motion_twist.vel.x());
-    RCLCPP_INFO(rclcpp::get_logger("line_pat()"), "phi: %f", phi);
+    RCLCPP_DEBUG(rclcpp::get_logger("line_path()"), "phi: %f", phi);
     double R = std::numeric_limits<double>::infinity();
     KDL::Frame start_pose = KDL::Frame(KDL::Rotation::Identity(), current_position_b);
     double max_dist = eta * std::max(workspace.a(), std::max(workspace.b(), workspace.c()));
@@ -325,7 +318,7 @@ KDL::Path* Leg::line_path() {
     if (test_path->PathLength() <= KDL::epsilon) {
         delete test_path;
         duration = 0;
-        return point_path();
+        return nullptr;
     }
     
     KDL::Frame end_pose = start_pose;
@@ -346,7 +339,7 @@ KDL::Path* Leg::line_path() {
                               true);
 }
 
-KDL::Path* Leg::arc_path(KDL::Vector rotcenter) {
+inline KDL::Path* Leg::arc_path(KDL::Vector rotcenter) {
     int direction = motion_twist.rot.z() > 0 ? -1 : 1;
 
     KDL::Frame start_pose(current_position_b);
@@ -371,22 +364,26 @@ KDL::Path* Leg::arc_path(KDL::Vector rotcenter) {
         }
         return path.Clone();
     } catch (const KDL::Error_MotionPlanning_Circle_ToSmall& e) {
-        RCLCPP_INFO(rclcpp::get_logger("arc gen"), "leg %d circle too small", id);
+        RCLCPP_DEBUG(rclcpp::get_logger("arc gen"), "leg %d circle too small", id);
         duration = 0;
-        return point_path();
+        return nullptr;
     } catch (const KDL::Error_MotionPlanning_Circle_No_Plane& e) {
-        RCLCPP_INFO(rclcpp::get_logger("arc gen"), "leg %d circle no plane", id);
+        RCLCPP_DEBUG(rclcpp::get_logger("arc gen"), "leg %d circle no plane", id);
         duration = 0;
-        return point_path();
+        return nullptr;
     }
 }
 
 // transfer trajectories
-void Leg::generateTransferPathCenter(double height, double duration) {
+inline void Leg::generateTransferPathCenter(double height, double transfer_duration) {
     this->traj_type = transfer;
-    this->path = new KDL::Path_Cycloid(KDL::Frame(current_position_b), workspace.getCenterB(), height, duration);
-    double S = this->path->PathLength();
-    this->velprof = new KDL::VelocityProfile_Trap(2*S/duration, 4*S/pow(duration,2));
-    this->velprof->SetProfile(0.0, this->path->PathLength());
-    this->traj = new KDL::Trajectory_Segment(this->path, this->velprof);
+    KDL::Path* path = new KDL::Path_Cycloid(KDL::Frame(current_position_b), workspace.getCenterB(), height);
+    double S = path->PathLength();
+    if (S <= KDL::epsilon || transfer_duration <= KDL::epsilon) {
+        delete path;
+        setStationaryTrajectory();
+        return;
+    }
+    // trapezoidal profile whose duration is exactly transfer_duration
+    setSegmentTrajectory(path, new KDL::VelocityProfile_Trap(2*S/transfer_duration, 4*S/std::pow(transfer_duration,2)));
 }

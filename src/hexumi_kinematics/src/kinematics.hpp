@@ -15,11 +15,14 @@
 #include <servo2040_uros/msg/joint_angles.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 
+#include <atomic>
 #include <cmath>
 #include <memory>
+#include <mutex>
 #include <stdexcept>
-
+#include <string>
 #include <vector>
+
 #include "leg.hpp"
 
 #define DEFAULT_TIMESTEP 0.02
@@ -31,13 +34,12 @@ public:
     Kinematics();
 
 private:
-    std::shared_ptr<rclcpp::AsyncParametersClient> parameters_client_;
-    void set_params_from_global_param_server(std::shared_future<std::vector<rclcpp::Parameter>>);
+    void load_params_from_global_param_server();
 
-    int num_legs;
-    int num_joints;
+    int num_legs = 0;
+    int num_joints = 0; // total number of joints, num_legs * joints per leg
     std::vector<std::string> leg_suffixes;
-    float coxa_length, femur_length, tibia_length;
+    float coxa_length = 0.0f, femur_length = 0.0f, tibia_length = 0.0f;
     std::vector<Leg> legs;
     
     rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr      joint_states_pub_;
@@ -52,6 +54,13 @@ private:
     rclcpp::Subscription<servo2040_uros::msg::Current>::SharedPtr       current_sub_;
     rclcpp::Subscription<servo2040_uros::msg::FeetContacts>::SharedPtr  feet_contacts_sub_;
     rclcpp::TimerBase::SharedPtr timer_;
+
+    // The gait runs blocking loops inside the timer callback. Subscriptions live in their own
+    // callback group so a multi-threaded executor keeps receiving commands (e.g. power off)
+    // while a step is in progress.
+    rclcpp::CallbackGroup::SharedPtr command_cb_group_;
+    rclcpp::CallbackGroup::SharedPtr control_cb_group_;
+
     void meta_cmd_callback(const hexumi_msgs::msg::MetaCommands::SharedPtr);
     void hexapod_motion_callback(const hexumi_msgs::msg::HexapodMotion::SharedPtr);
     void body_control_callback(const hexumi_msgs::msg::BodyControl::SharedPtr);
@@ -60,38 +69,50 @@ private:
     void timer_callback();
     void publish_joint_states();
 
-    bool is_power_on;
-    bool is_ready;
-    bool imu_status;
+    // written by command callbacks, polled by the control loop
+    std::atomic<bool> is_power_on{false};
+    std::atomic<bool> is_ready{false};
+    std::atomic<bool> imu_status{false};
 
-    bool is_sitting;
+    // latest commands, guarded by command_mutex_ and copied into the control state once per tick
+    std::mutex command_mutex_;
+    KDL::Frame cmd_body_pose = KDL::Frame::Identity();
+    KDL::Twist cmd_body_twist = KDL::Twist::Zero();
+    KDL::Twist cmd_motion_twist = KDL::Twist::Zero();
+    int cmd_gait_type = hexumi_msgs::msg::HexapodMotion::TRIPOD_GAIT;
+    bool cmd_is_omnidirectional = false;
+    void fetch_commands();
 
-    KDL::Frame body_pose;
-    KDL::Twist body_twist;
+    // control state, only touched by the control loop
+    bool is_sitting = true;
 
-    KDL::Twist motion_twist; // motion velocity twist in virtual body frame
-    int gait_type; // 0 for wave, 1 for ripple, 2 for tripod
-    bool is_omnidirectional; // false for streamlined, true or omnidirectional  
+    KDL::Frame body_pose = KDL::Frame::Identity();
+    KDL::Twist body_twist = KDL::Twist::Zero();
 
-    double total_current;
-    std::vector<bool> feet_states;
+    KDL::Twist motion_twist = KDL::Twist::Zero(); // motion velocity twist in virtual body frame
+    int gait_type = hexumi_msgs::msg::HexapodMotion::TRIPOD_GAIT; // 0 for wave, 1 for ripple, 2 for tripod
+    bool is_omnidirectional = false; // false for streamlined, true or omnidirectional
+    bool warned_unsupported_gait = false;
 
-    bool params_set_flag;
+    std::atomic<double> total_current{0.0};
 
-    double max_lin_velocity;
-    double max_ang_velocity;
+    double max_lin_velocity = 0.0;
+    double max_ang_velocity = 0.0;
 
-    double transfer_height;
+    double transfer_height = 0.0;
 
-    bool is_in_null_pos;
+    bool is_in_null_pos = false;
+
+    // moves every leg from its sitting position to its null position (or back) via a point above/below it
+    void move_legs_vertically_first(bool standing_up);
+    // samples all legs' trajectories from 0 to duration (inclusive), publishing every dt
+    bool play_trajectories(const std::vector<int>& leg_ids, double duration, double dt, bool abortable);
 
     void sit_down();
     void stand_up();
 
     void move_robot();
-    void move_wave();
-    void move_ripple();
-    void move_tripod();
+    bool move_tripod(); // false if the step was aborted
 
     void move_body();
 

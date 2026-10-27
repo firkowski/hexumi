@@ -9,7 +9,7 @@
         "/home/max/Documents/thesis-sync/code/hexumi/src/uros/uros_ws/install/micro_ros_agent/include/**",
         "/home/max/Documents/thesis-sync/code/hexumi/src/uros/uros_ws/install/micro_ros_msgs/include/**",
         "/home/max/Documents/thesis-sync/code/hexumi/src/uros/uros_ws/install/servo2040_uros/include/**",
-        "/opt/ros/humble/include/**",
+        "/opt/ros/jazzy/include/**",
         "/home/max/Documents/thesis-sync/code/hexumi/src/uros/uros_ws/src/servo2040_uros/include/**",
         "/home/max/Documents/thesis-sync/code/hexumi/src/uros/uros_ws/src/uros/micro-ROS-Agent/micro_ros_agent/include/**",
         "/usr/include/**"
